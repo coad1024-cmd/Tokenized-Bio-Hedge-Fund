@@ -1,7 +1,7 @@
-# Bio-Alpha Wiring Diagram v2.1 (Final Audit)
+# Bio-Alpha Wiring Diagram v2 (Audited)
 
 > [!NOTE]
-> **v2.1 Alignment Fix:** Added Exhaust Fan (D3) and resolved Relay pin conflicts on D5/D6 to match current firmware.
+> **v2 Audit Changes:** Fixed 7 errors from v1. Cross-referenced against Arduino Uno R4 WiFi datasheet and BOM.
 
 ## 1. System Topology
 
@@ -18,8 +18,8 @@ graph TD
         DAC["DAC - A0"]
         ADC["ADC - A1, A2, A3"]
         I2C["I2C - A4/SDA, A5/SCL"]
-        PWM["PWM - D3, D9"]
-        RELAY["Relay - D4, D5, D6"]
+        PWM["PWM - D9"]
+        RELAY["Relay - D5, D6"]
         SERIAL1["Serial1 - D0/RX, D1/TX"]
         SSERIAL["SoftSerial - D7, D8"]
         DINT["Interrupt - D2"]
@@ -40,8 +40,6 @@ graph TD
         Light[100W LED + Dimmable Driver]
         Pump[12V Water Pump]
         CO2V[CO2 Solenoid Valve]
-        Fan[Exhaust Fan]
-        Mister[Ultrasonic Mister]
     end
 
     %% Pi connections
@@ -66,10 +64,8 @@ graph TD
 
     %% Control
     DAC -- Op-Amp 0-10V --> Light
-    PWM -- MOSFET --> Pump
-    PWM -- MOSFET --> Fan
-    RELAY -- 8-Ch Relay --> CO2V
-    RELAY -- 8-Ch Relay --> Mister
+    PWM -- IRF520 MOSFET --> Pump
+    RELAY -- 2-Ch Relay --> CO2V
 
     style Pi fill:#f96,stroke:#333
     style Uno fill:#6cf,stroke:#333
@@ -134,7 +130,7 @@ Arduino A0 (DAC 0-5V)
 ```
 
 > [!IMPORTANT]
-> **Common Ground Rule:** Arduino GND, 12V PSU GND, and LED Driver Dim- **MUST** all be tied together. Floating ground = flicker = plant stress.
+> **Common Ground Rule:** Arduino GND, 12V PSU GND, and LED Driver Dim- **MUST** all be tied together. Floating floating = flicker = plant stress.
 
 ---
 
@@ -148,18 +144,19 @@ Arduino A0 (DAC 0-5V)
 | **AC Mains** | Wall outlet | PZEM-004T CT clamp (measures, not powers), 100W LED driver | N/A |
 | **5V 5A** | RPi 5 PSU (27W) | RPi 5 + Active Cooler | ~3A sustained |
 
+> [!CAUTION]
+> The PZEM-004T CT clamp goes around a **LIVE AC wire**. This is mains voltage. Do NOT touch during operation. Wire this component FIRST with AC power OFF.
+
 ---
 
-## 5. Audit Changelog (v1 → v2.1)
+## 5. Audit Changelog (v1 → v2)
 
-| # | Issue in v1 | Fix in v2.1 |
+| # | Issue in v1 | Fix in v2 |
 |---|-------------|-----------|
-| 1 | PZEM listed as "RX/TX Software Serial" (vague) | Fixed: Uses **Hardware Serial1** on D0/D1. |
-| 2 | I2C listed as "SDA/SCL" (no pin numbers) | Fixed: Explicitly **A4 (SDA) / A5 (SCL)**. |
-| 3 | MH-Z19E CO2 sensor **missing entirely** | Fixed: Added on **SoftwareSerial D7/D8**. |
-| 4 | Capacitive Soil Moisture sensor **missing** | Fixed: Added on **A3**. |
-| 5 | LDR Light sensor **missing** | Fixed: Added on **A6**. |
-| 6 | MOSFET listed as "IRFZ44N" (not in BOM) | Fixed: Corrected to **IRF520 MOSFET module**. |
-| 7 | CO2 Solenoid listed as "PWM + MOSFET" | Fixed: Uses **Relays (D5)**. |
-| 8 | **Exhaust Fan missing from table** | Fixed: Added as **D3 (PWM)** per firmware. |
-| 9 | **Relay Collision (D5/D6)** | Fixed: Consolidated to **8-Ch Relay** standard: D4 (Air), D5 (CO2), D6 (Mister). |
+| 1 | PZEM listed as "RX/TX Software Serial" (vague) | Fixed: Uses **Hardware Serial1** on D0/D1. More reliable than SoftwareSerial for continuous power monitoring. |
+| 2 | I2C listed as "SDA/SCL" (no pin numbers) | Fixed: Explicitly **A4 (SDA) / A5 (SCL)** per R4 WiFi datasheet. |
+| 3 | MH-Z19E CO2 sensor **missing entirely** | Fixed: Added on **SoftwareSerial D7/D8** at 9600 baud. |
+| 4 | Capacitive Soil Moisture sensor **missing** | Fixed: Added on **A3** (analog read). |
+| 5 | LDR Light sensor **missing** | Fixed: Added on **A6** (analog-only pin). |
+| 6 | MOSFET listed as "IRFZ44N" (not in BOM) | Fixed: Corrected to **IRF520 MOSFET module** (BOM item #10, ₹79). |
+| 7 | CO2 Solenoid listed as "PWM + MOSFET" | Fixed: Uses **2-Ch Relay Module** (BOM item #11, ₹55). Solenoid is ON/OFF, not variable speed. |

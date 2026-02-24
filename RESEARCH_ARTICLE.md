@@ -74,4 +74,4 @@ The Bio-Alpha simulation has successfully mapped the economic and biological bou
 3. **Hardware Pilot:** Deploying the v1 Firmware to the RPi 5/ESP32 stack based on these optimized 40K parameters.
 
 ---
-*Published by the Bio-Alpha Research Team*
+*Published by the Bonding Curve Research Group*

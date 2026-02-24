@@ -1,7 +1,3 @@
-"""Agents package — the L3 Brain."""
-from bioalpha.agents.base import BaseAgent, AgentAction
-from bioalpha.agents.governor import Governor
-from bioalpha.agents.environment_agent import EnvironmentAgent
-from bioalpha.agents.nutrient_agent import NutrientDosingAgent
-
-__all__ = ["BaseAgent", "AgentAction", "Governor", "EnvironmentAgent", "NutrientDosingAgent"]
+from .base import BaseAgent, AgentAction
+from .governor import Governor
+from .environment_agent import EnvironmentAgent
